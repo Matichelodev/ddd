@@ -1,0 +1,57 @@
+version: '3.9'
+
+services:
+  # Servicio de PostgreSQL
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Matichelo17
+      POSTGRES_DB: evolution
+    ports:
+      - "5434:5432"  # El puerto 5433 de tu máquina local se mapea al puerto 5432 del contenedor de PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Servicio de Evolution API
+  evolution-api:
+    container_name: evolution_api
+    image: atendai/evolution-api:v2.1.1
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      # Configuración de CORS
+      CORS_ORIGIN: "*"
+      CORS_METHODS: "POST,GET,PUT,DELETE"
+      CORS_CREDENTIALS: "true"
+      
+      # Configuración de autenticación
+      AUTHENTICATION_API_KEY: "429683C4C977415CAAFCCE10F7D57E11"
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      
+      # Configuración de base de datos
+      DATABASE_ENABLED: "false"
+      DATABASE_PROVIDER: "postgresql"
+      DATABASE_CONNECTION_URI: "postgresql://postgres:Matichelo17@postgres:5432/evolution?schema=public"
+      DATABASE_CONNECTION_CLIENT_NAME: "evolution_api"
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "false"
+      DATABASE_SAVE_MESSAGE_UPDATE: "false"
+      DATABASE_SAVE_DATA_CONTACTS: "false"
+      DATABASE_SAVE_DATA_CHATS: "false"
+      
+      # Configuración de Redis
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_REDIS_URI: ""
+      CACHE_REDIS_PREFIX_KEY: "evolution_api"
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  evolution_instances:
